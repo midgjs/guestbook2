@@ -18,8 +18,8 @@ public class WebUtil {
 	//메소드 일반
 	//포워드
 	public static void forward(HttpServletRequest request, 
-			            HttpServletResponse response,
-			            String path) throws ServletException, IOException{
+			            	   HttpServletResponse response,
+			                   String path) throws ServletException, IOException{
 		
 		RequestDispatcher rd = request.getRequestDispatcher(path);
 		rd.forward(request, response);
@@ -27,8 +27,8 @@ public class WebUtil {
 	
 	//리다이렉트
 	public static void redirect(HttpServletRequest request,
-			             HttpServletResponse response,
-			             String url) throws IOException{
+			             	    HttpServletResponse response,
+		             	    	String url) throws IOException{
 		
 		response.sendRedirect(url);
 		
