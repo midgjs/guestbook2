@@ -12,33 +12,75 @@ import com.javaex.vo.GuestbookVo;
 
 public class GuestbookDao {
 
-	public List<GuestbookVo> getList() {
-		// 0. import java.sql.*;
-		Connection conn = null;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		List<GuestbookVo> list = new ArrayList<GuestbookVo>();
+	// 0. import java.sql.*;
+	private Connection conn = null;
+	private PreparedStatement pstmt = null;
+	private ResultSet rs = null;
 
+	private String driver = "oracle.jdbc.driver.OracleDriver";
+	private String url = "jdbc:oracle:thin:@localhost:1521:xe";
+	private String id = "webdb";
+	private String pw = "webdb";
+
+	private void getConnection() {
 		try {
 			// 1. JDBC 드라이버 (Oracle) 로딩
-			Class.forName("oracle.jdbc.driver.OracleDriver");
+			Class.forName(driver);
 
 			// 2. Connection 얻어오기
-			String url = "jdbc:oracle:thin:@localhost:1521:xe";
-			conn = DriverManager.getConnection(url, "webdb", "webdb");
+			conn = DriverManager.getConnection(url, id, pw);
+			// System.out.println("접속성공");
+
+		} catch (ClassNotFoundException e) {
+			System.out.println("error: 드라이버 로딩 실패 - " + e);
+		} catch (SQLException e) {
+			System.out.println("error:" + e);
+		}
+	}
+
+	private void close() {
+		// 5. 자원정리
+		try {
+			if (rs != null) {
+				rs.close();
+			}
+			if (pstmt != null) {
+				pstmt.close();
+			}
+			if (conn != null) {
+				conn.close();
+			}
+		} catch (SQLException e) {
+			System.out.println("error:" + e);
+		}
+	}
+
+	public List<GuestbookVo> getList() {
+		List<GuestbookVo> list = new ArrayList<GuestbookVo>();
+
+		this.getConnection();
+
+		try {
 
 			// 3. SQL문 준비 / 바인딩 / 실행
-			String query = " select no, " + 
-						   "        name, " + 
-					       "        password, " + 
-					       "        content, " + 
-					       "        reg_date " + 
-			               " from guestbook " +
-					       " order by reg_date desc ";
+
+			// SQL문 준비
+			String query = "";
+			query += " select no, ";
+			query += "        name, ";
+			query += "        password, ";
+			query += "        content, ";
+			query += "        reg_date ";
+			query += " from guestbook ";
+			query += " order by reg_date desc  ";
+
+			// 바인딩
 			pstmt = conn.prepareStatement(query);
-			System.out.println("=====");
 			System.out.println(query);
+
+			// 실행
 			rs = pstmt.executeQuery();
+
 			// 4.결과처리
 			while (rs.next()) {
 				int no = rs.getInt("no");
@@ -51,109 +93,68 @@ public class GuestbookDao {
 				list.add(vo);
 			}
 
-		} catch (ClassNotFoundException e) {
-			System.out.println("error: 드라이버 로딩 실패 - " + e);
 		} catch (SQLException e) {
 			System.out.println("error:" + e);
-		} finally {
-			// 5. 자원정리
-			try {
-				if (pstmt != null) {
-					pstmt.close();
-				}
-				if (conn != null) {
-					conn.close();
-				}
-			} catch (SQLException e) {
-				System.out.println("error:" + e);
-			}
-
 		}
+
+		this.close();
 
 		return list;
 	}
 
 	public int insert(GuestbookVo vo) {
-		// 0. import java.sql.*;
-		Connection conn = null;
-		PreparedStatement pstmt = null;
 		int count = 0;
 
-		try {
-			// 1. JDBC 드라이버 (Oracle) 로딩
-			Class.forName("oracle.jdbc.driver.OracleDriver");
+		this.getConnection();
 
-			// 2. Connection 얻어오기
-			String url = "jdbc:oracle:thin:@localhost:1521:xe";
-			conn = DriverManager.getConnection(url, "webdb", "webdb");
+		try {
 
 			// 3. SQL문 준비 / 바인딩 / 실행
-			String query = " insert into guestbook " + 
-			               "        (no, " + 
-			               "         name, " +
-			               "         password, " +
-			               "         content, " +
-			               "         reg_date) " +
-			               " values (seq_guestbook_no.nextval, " +
-			               "         ?, " +
-			               "         ?, " +
-			               "         ?, " +
-			               "         sysdate) " ;	
-			
+			// SQL문 준비
+			String query = "";
+			query += " insert into guestbook (no, name, password, content, reg_date) ";
+			query += " values (seq_guestbook_no.nextval, ?, ?, ?, sysdate) ";
+
+			// 바인딩
 			pstmt = conn.prepareStatement(query);
 
 			pstmt.setString(1, vo.getName());
 			pstmt.setString(2, vo.getPassword());
 			pstmt.setString(3, vo.getContent());
 
+			// 실행
 			count = pstmt.executeUpdate();
 
 			// 4.결과처리
 			System.out.println(count + "건 등록");
 
-		} catch (ClassNotFoundException e) {
-			System.out.println("error: 드라이버 로딩 실패 - " + e);
 		} catch (SQLException e) {
 			System.out.println("error:" + e);
-		} finally {
-			// 5. 자원정리
-			try {
-				if (pstmt != null) {
-					pstmt.close();
-				}
-				if (conn != null) {
-					conn.close();
-				}
-			} catch (SQLException e) {
-				System.out.println("error:" + e);
-			}
-
 		}
+
+		this.close();
 
 		return count;
 	}
 
 	public int delete(GuestbookVo vo) {
-		// 0. import java.sql.*;
-		Connection conn = null;
-		PreparedStatement pstmt = null;
 		int count = 0;
 
-		try {
-			// 1. JDBC 드라이버 (Oracle) 로딩
-			Class.forName("oracle.jdbc.driver.OracleDriver");
+		this.getConnection();
 
-			// 2. Connection 얻어오기
-			String url = "jdbc:oracle:thin:@localhost:1521:xe";
-			conn = DriverManager.getConnection(url, "webdb", "webdb");
+		try {
 
 			// 3. SQL문 준비 / 바인딩 / 실행
-			String query = " delete from guestbook " + 
-					       " where no= ? " + 
-				           " and password= ? " ;
-			
+			// SQL문 준비
+			String query = "";
+			query += " delete from guestbook ";
+			query += " where no= ?  ";
+			query += " and password= ?  ";
+
+			// 바인딩
 			pstmt = conn.prepareStatement(query);
 
+			// 실행
 			pstmt.setInt(1, vo.getNo());
 			pstmt.setString(2, vo.getPassword());
 
@@ -162,24 +163,11 @@ public class GuestbookDao {
 			// 4.결과처리
 			System.out.println(count + "건 삭제");
 
-		} catch (ClassNotFoundException e) {
-			System.out.println("error: 드라이버 로딩 실패 - " + e);
 		} catch (SQLException e) {
 			System.out.println("error:" + e);
-		} finally {
-			// 5. 자원정리
-			try {
-				if (pstmt != null) {
-					pstmt.close();
-				}
-				if (conn != null) {
-					conn.close();
-				}
-			} catch (SQLException e) {
-				System.out.println("error:" + e);
-			}
-
 		}
+
+		this.close();
 
 		return count;
 	}
