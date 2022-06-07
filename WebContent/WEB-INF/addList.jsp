@@ -2,6 +2,7 @@
 
 <%@ page import="com.javaex.vo.GuestbookVo" %>
 <%@ page import="java.util.List" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 
 <%
 	List<GuestbookVo> guestList = (List<GuestbookVo>)request.getAttribute("guestList");
@@ -36,7 +37,7 @@
 	%>
 			<table  border="1" width="510px">
 				<tr>
-					<td>[<%=vo.getNo() %>]</td>
+					<td><%=vo.getNo() %></td>
 					<td><%=vo.getName() %></td>
 					<td><%=vo.getRegDate() %></td>
 					<td><a href="/guestbook2/gbc?action=deleteform&no=<%=vo.getNo() %>">삭제</a></td>
